@@ -1,16 +1,39 @@
 import * as PIXI from "pixi.js";
 
 export class HighlightFilter extends PIXI.Filter {
-  constructor(private _backgroundColor: number, private _borderColor: number) {
-    super(vertex, fragment);
-    this.uniforms.backgroundColor = new Float32Array(4);
-    this.uniforms.borderColor = new Float32Array(4);
+  private _uniforms: any;
 
-    this.uniforms.backgroundColor = [
-      ...PIXI.utils.hex2rgb(this._backgroundColor),
-      1.0,
+  constructor(private _backgroundColor: number, private _borderColor: number) {
+    super({
+      glProgram: PIXI.GlProgram.from({
+        vertex,
+        fragment,
+      }),
+    });
+
+    this._uniforms = {
+      backgroundColor: new Float32Array(4),
+      borderColor: new Float32Array(4),
+    };
+
+    // Convert hex colors to RGB arrays
+    const bgRgb = this.hexToRgb(this._backgroundColor);
+    const borderRgb = this.hexToRgb(this._borderColor);
+
+    this._uniforms.backgroundColor = [...bgRgb, 1.0];
+    this._uniforms.borderColor = [...borderRgb, 1.0];
+  }
+
+  get uniforms() {
+    return this._uniforms;
+  }
+
+  private hexToRgb(hex: number): [number, number, number] {
+    return [
+      ((hex >> 16) & 255) / 255,
+      ((hex >> 8) & 255) / 255,
+      (hex & 255) / 255
     ];
-    this.uniforms.borderColor = [...PIXI.utils.hex2rgb(this._borderColor), 1.0];
   }
 }
 

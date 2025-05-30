@@ -14,7 +14,7 @@ interface Props {
 
 export class Tile extends PIXI.Container implements IRoomPart {
   private _container: PIXI.Container | undefined;
-  private _sprites: PIXI.DisplayObject[] = [];
+  private _sprites: PIXI.Container[] = [];
 
   private _texture: PIXI.Texture | undefined;
   private _color: string | undefined;
@@ -85,13 +85,15 @@ export class Tile extends PIXI.Container implements IRoomPart {
 
     const tileMatrix = getFloorMatrix(0, 0);
 
-    const tile = new PIXI.TilingSprite(this._texture ?? PIXI.Texture.WHITE);
+    const tile = new PIXI.TilingSprite({
+      texture: this._texture ?? PIXI.Texture.WHITE,
+      width: 32,
+      height: 32,
+    });
 
     tile.tilePosition = this.tilePositions;
 
-    tile.transform.setFromMatrix(tileMatrix);
-    tile.width = 32;
-    tile.height = 32;
+    tile.setFromMatrix(tileMatrix);
     tile.tint = this._roomPartData?.tileTopColor ?? 0;
 
     const borderLeftMatrix = getLeftMatrix(0, 0, {
@@ -104,25 +106,27 @@ export class Tile extends PIXI.Container implements IRoomPart {
       height: this.tileHeight,
     });
 
-    const borderLeft = new PIXI.TilingSprite(
-      this._texture ?? PIXI.Texture.WHITE
-    );
+    const borderLeft = new PIXI.TilingSprite({
+      texture: this._texture ?? PIXI.Texture.WHITE,
+      width: 32,
+      height: this.tileHeight,
+    });
 
     borderLeft.tilePosition = this.tilePositions;
 
-    borderLeft.transform.setFromMatrix(borderLeftMatrix);
+    borderLeft.setFromMatrix(borderLeftMatrix);
     borderLeft.width = 32;
     borderLeft.height = this.tileHeight;
     borderLeft.tint = this._roomPartData?.tileLeftColor ?? 0;
 
-    const borderRight = new PIXI.TilingSprite(
-      this._texture ?? PIXI.Texture.WHITE
-    );
+    const borderRight = new PIXI.TilingSprite({
+      texture: this._texture ?? PIXI.Texture.WHITE,
+      width: 32,
+      height: this.tileHeight,
+    });
     borderRight.tilePosition = this.tilePositions;
 
-    borderRight.transform.setFromMatrix(borderRightMatrix);
-    borderRight.width = 32;
-    borderRight.height = this.tileHeight;
+    borderRight.setFromMatrix(borderRightMatrix);
     borderRight.tint = this._roomPartData?.tileRightColor ?? 0;
 
     this._sprites.push(this._container);

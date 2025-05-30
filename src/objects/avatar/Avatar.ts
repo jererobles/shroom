@@ -670,6 +670,41 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
       this.roomVisualization.container.addChild(this._avatarSprites);
     }
   }
+
+  /**
+   * Load avatar assets asynchronously. This is useful when you want to ensure
+   * the avatar is fully loaded before adding it to the room.
+   * @returns Promise that resolves when avatar is loaded
+   */
+  async loadAsync(): Promise<void> {
+    if (this._loaded) {
+      return; // Already loaded
+    }
+
+    return new Promise((resolve) => {
+      const checkLoaded = () => {
+        if (this._loaded) {
+          resolve();
+        } else {
+          // Check again in a moment
+          setTimeout(checkLoaded, 10);
+        }
+      };
+      
+      checkLoaded();
+    });
+  }
+
+  /**
+   * Static factory method to create avatar asynchronously with assets preloaded
+   * @param options Avatar creation options
+   * @returns Promise that resolves to a fully loaded avatar instance
+   */
+  static async createAsync(options: Options): Promise<Avatar> {
+    const avatar = new Avatar(options);
+    await avatar.loadAsync();
+    return avatar;
+  }
 }
 
 interface Options extends RoomPosition {

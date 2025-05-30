@@ -112,11 +112,9 @@ export class HitSprite extends PIXI.Sprite implements IEventTarget {
     const hitMap = this._hitTexture.getHitMap();
     if (hitMap == null) return;
 
-    const sprite = new PIXI.TilingSprite(
-      PIXI.Texture.WHITE,
-      this._hitTexture.texture.width,
-      this._hitTexture.texture.height
-    );
+    const sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+    sprite.width = this._hitTexture.texture.width;
+    sprite.height = this._hitTexture.texture.height;
 
     sprite.alpha = 0.1;
 
@@ -225,10 +223,11 @@ export class HitSprite extends PIXI.Sprite implements IEventTarget {
     return false;
   }
 
-  updateTransform() {
-    super.updateTransform();
+  updateTransform(opts: any = {}) {
+    super.updateTransform(opts);
 
     this._rectangleSubject.next(this.getHitBox());
+    return this;
   }
 }
 

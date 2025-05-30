@@ -2,8 +2,7 @@ import * as PIXI from "pixi.js";
 
 import { Room } from "./Room";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const TWEEN = require("tween.js");
+import * as TWEEN from "@tweenjs/tween.js";
 
 export class RoomCamera extends PIXI.Container {
   private _state: RoomCameraState = { type: "WAITING" };
@@ -87,20 +86,20 @@ export class RoomCamera extends PIXI.Container {
     }
   };
 
-  private _handlePointerDown = (event: PIXI.InteractionEvent) => {
-    const position = event.data.getLocalPosition(this.parent);
+  private _handlePointerDown = (event: PIXI.FederatedPointerEvent) => {
+    const position = event.getLocalPosition(this.parent);
     if (this._state.type === "WAITING") {
-      this._enterWaitingForDistance(position, event.data.pointerId);
+      this._enterWaitingForDistance(position, event.pointerId);
     } else if (this._state.type === "ANIMATE_ZERO") {
-      this._changingDragWhileAnimating(position, event.data.pointerId);
+      this._changingDragWhileAnimating(position, event.pointerId);
     }
   };
 
   private _handlePointerMove = (event: PointerEvent) => {
     const box = this._room.application.view.getBoundingClientRect();
     const position = new PIXI.Point(
-      event.clientX - box.x - this.parent.worldTransform.tx,
-      event.clientY - box.y - this.parent.worldTransform.tx
+      event.clientX - box.x - (this.parent as any).worldTransform.tx,
+      event.clientY - box.y - (this.parent as any).worldTransform.tx
     );
 
     switch (this._state.type) {
@@ -148,8 +147,8 @@ export class RoomCamera extends PIXI.Container {
   }
 
   private _isOutOfBounds(offsets: { x: number; y: number }) {
-    const roomX = this.parent.transform.position.x + this._room.x;
-    const roomY = this.parent.transform.position.y + this._room.y;
+    const roomX = (this.parent as any).transform.position.x + this._room.x;
+    const roomY = (this.parent as any).transform.position.y + this._room.y;
 
     if (roomX + this._room.roomWidth + offsets.x <= 0) {
       // The room is out of bounds to the left side.
@@ -192,10 +191,10 @@ export class RoomCamera extends PIXI.Container {
     const tween = new TWEEN.Tween(newPos)
       .to({ x: 0, y: 0 }, duration)
       .easing(TWEEN.Easing.Quadratic.Out) // Use an easing function to make the animation smooth.
-      .onUpdate((value: number) => {
+      .onUpdate(() => {
         this._animatedOffsets = newPos;
 
-        if (value >= 1) {
+        if (newPos.x === 0 && newPos.y === 0) {
           this._state = { type: "WAITING" };
         }
 

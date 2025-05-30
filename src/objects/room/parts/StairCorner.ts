@@ -54,7 +54,7 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
     this.destroySprites();
   }
 
-  private _createStairBoxFront(index: number): PIXI.DisplayObject[] {
+  private _createStairBoxFront(index: number): PIXI.Container[] {
     const baseXLeft = +stairBase * index;
     const baseYLeft = -stairBase * index * 1.5;
 
@@ -69,8 +69,8 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
       tilePosition: PIXI.Point
     ) {
       const tile = new PIXI.TilingSprite(texture ?? PIXI.Texture.WHITE);
-      tile.tilePosition = tilePosition;
-      tile.transform.setFromMatrix(matrix);
+      (tile as any).tilePosition = tilePosition;
+      (tile as any).transform.setFromMatrix(matrix);
 
       tile.tint = tint;
 
@@ -121,7 +121,7 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
     return [borderLeft, borderRight, tileLeft, tileRight];
   }
 
-  private _createStairBoxLeft(index: number) {
+  private _createStairBoxLeft(index: number): PIXI.Container[] {
     const baseX = -stairBase * index;
     const baseY = -stairBase * index * 1.5;
     const texture = this._texture;
@@ -132,8 +132,8 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
       tilePosition: PIXI.Point
     ) {
       const tile = new PIXI.TilingSprite(texture ?? PIXI.Texture.WHITE);
-      tile.tilePosition = tilePosition;
-      tile.transform.setFromMatrix(matrix);
+      (tile as any).tilePosition = tilePosition;
+      (tile as any).transform.setFromMatrix(matrix);
 
       tile.tint = tint;
 
@@ -189,7 +189,7 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
     }
   }
 
-  private _createStairBoxRight(index: number) {
+  private _createStairBoxRight(index: number): PIXI.Container[] {
     const baseX = +stairBase * index;
     const baseY = -stairBase * index * 1.5;
     const texture = this._texture;
@@ -200,8 +200,8 @@ export class StairCorner extends PIXI.Container implements IRoomPart {
       tilePosition: PIXI.Point
     ) {
       const tile = new PIXI.TilingSprite(texture ?? PIXI.Texture.WHITE);
-      tile.tilePosition = tilePosition;
-      tile.transform.setFromMatrix(matrix);
+      (tile as any).tilePosition = tilePosition;
+      (tile as any).transform.setFromMatrix(matrix);
 
       tile.tint = tint;
 

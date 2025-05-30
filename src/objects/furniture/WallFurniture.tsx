@@ -180,6 +180,35 @@ export class WallFurniture extends RoomObject {
     this._baseFurniture.onPointerUp = value;
   }
 
+  /**
+   * Load furniture assets asynchronously. This is useful when you want to ensure
+   * the furniture is fully loaded before adding it to the room.
+   * @returns Promise that resolves when furniture is loaded
+   */
+  async loadAsync(): Promise<void> {
+    return this._baseFurniture.loadAsync();
+  }
+
+  /**
+   * Static factory method to create furniture asynchronously with assets preloaded
+   * @param options Furniture creation options
+   * @returns Promise that resolves to a fully loaded furniture instance
+   */
+  static async createAsync(
+    options: {
+      roomX: number;
+      roomY: number;
+      offsetX: number;
+      offsetY: number;
+      direction: number;
+      animation?: string;
+    } & FurnitureFetchInfo
+  ): Promise<WallFurniture> {
+    const furniture = new WallFurniture(options);
+    await furniture.loadAsync();
+    return furniture;
+  }
+
   destroyed(): void {
     this._baseFurniture.destroy();
   }

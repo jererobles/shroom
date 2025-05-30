@@ -1,3 +1,4 @@
+import * as PIXI from "pixi.js";
 import { IRoomPart } from "../objects/room/parts/IRoomPart";
 import { RoomLandscapeMaskSprite } from "../objects/room/RoomLandscapeMaskSprite";
 

@@ -1,4 +1,4 @@
-import { InteractionEvent } from "pixi.js";
+import { FederatedEvent } from "pixi.js";
 import { BehaviorSubject } from "rxjs";
 import { Rectangle } from "../room/IRoomRectangle";
 import { EventManager } from "./EventManager";
@@ -10,7 +10,7 @@ import {
 } from "./interfaces/IEventGroup";
 import { IEventTarget } from "./interfaces/IEventTarget";
 
-const interactionEvent: InteractionEvent = {
+const interactionEvent: FederatedEvent = {
   data: {},
 } as any;
 

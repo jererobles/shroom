@@ -18,6 +18,7 @@ import { RoomModelVisualization } from "./RoomModelVisualization";
 import { ParsedTileMap } from "./ParsedTileMap";
 import { getTileColors, getWallColors } from "./util/getTileColors";
 import { EventManager } from "../events/EventManager";
+import { loadRoomTexture } from "../../util/loadRoomTexture";
 
 export interface Dependencies {
   animationTicker: IAnimationTicker;
@@ -139,7 +140,60 @@ export class Room
    * @param options Room creation options
    */
   static create(shroom: Shroom, { tilemap }: CreateOptions) {
-    return new Room({ ...shroom.dependencies, tilemap });
+    return new Room({ tilemap, ...shroom.dependencies });
+  }
+
+  /**
+   * Creates a new room asynchronously with textures preloaded.
+   * @param shroom A shroom instance
+   * @param options Room creation options with optional texture preloading
+   */
+  static async createAsync(
+    shroom: Shroom,
+    options: CreateOptions & {
+      wallTexture?: string | PIXI.Texture;
+      floorTexture?: string | PIXI.Texture;
+      preloadFurniture?: string[];
+    }
+  ): Promise<Room> {
+    const room = new Room({ tilemap: options.tilemap, ...shroom.dependencies });
+
+    // Preload textures if provided
+    const texturePromises: Promise<any>[] = [];
+
+    if (options.wallTexture) {
+      if (typeof options.wallTexture === 'string') {
+        const texturePromise = loadRoomTexture(options.wallTexture);
+        room.wallTexture = texturePromise;
+        texturePromises.push(texturePromise);
+      } else {
+        room.wallTexture = options.wallTexture;
+      }
+    }
+
+    if (options.floorTexture) {
+      if (typeof options.floorTexture === 'string') {
+        const texturePromise = loadRoomTexture(options.floorTexture);
+        room.floorTexture = texturePromise;
+        texturePromises.push(texturePromise);
+      } else {
+        room.floorTexture = options.floorTexture;
+      }
+    }
+
+    // Wait for textures to load
+    await Promise.all(texturePromises);
+
+    // Preload furniture if requested
+    if (options.preloadFurniture) {
+      await Promise.all(
+        options.preloadFurniture.map(type =>
+          shroom.dependencies.furnitureLoader.loadFurni({ kind: "type", type })
+        )
+      );
+    }
+
+    return room;
   }
 
   /**
@@ -294,6 +348,21 @@ export class Room
    * @param object The room object to attach
    */
   addRoomObject(object: IRoomObject) {
+    this._roomObjectContainer.addRoomObject(object);
+  }
+
+  /**
+   * Adds a room object asynchronously, ensuring it's fully loaded before adding.
+   * Useful for furniture and avatars that need asset loading.
+   * @param object The room object to attach
+   * @returns Promise that resolves when the object is fully loaded and added
+   */
+  async addRoomObjectAsync(object: IRoomObject): Promise<void> {
+    // If the object has a loadAsync method, wait for it
+    if ('loadAsync' in object && typeof object.loadAsync === 'function') {
+      await object.loadAsync();
+    }
+    
     this._roomObjectContainer.addRoomObject(object);
   }
 

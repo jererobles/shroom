@@ -50,7 +50,18 @@ export class HitTexture {
       image.onerror = (value) => reject(value);
     });
 
-    const texture = PIXI.Texture.from(image);
+    // Create a canvas and draw the image on it to use CanvasSource
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d");
+    
+    if (context == null) throw new Error("Invalid context 2d");
+    
+    context.drawImage(image, 0, 0);
+    
+    // Use the canvas instead of the image directly
+    const texture = PIXI.Texture.from(canvas);
 
     return new HitTexture(texture);
   }
@@ -72,12 +83,11 @@ export class HitTexture {
     }
     y = y - transform.y;
 
-    const baseTexture = this._texture.baseTexture;
     const hitmap = this._getHitMap();
 
-    const dx = Math.round(this._texture.orig.x + x * baseTexture.resolution);
-    const dy = Math.round(this._texture.orig.y + y * baseTexture.resolution);
-    const ind = dx + dy * baseTexture.realWidth;
+    const dx = Math.round(this._texture.orig.x + x * this._texture.source.resolution);
+    const dy = Math.round(this._texture.orig.y + y * this._texture.source.resolution);
+    const ind = dx + dy * this._texture.source.width;
     const ind1 = ind % 32;
     const ind2 = (ind / 32) | 0;
     return (hitmap[ind2] & (1 << ind1)) !== 0;
@@ -86,7 +96,7 @@ export class HitTexture {
   private _getHitMap() {
     if (this._cachedHitmap == null) {
       this._cachedHitmap = generateHitMap(
-        (this._texture.baseTexture.resource as any).source
+        (this._texture.source as any).source
       );
     }
 

@@ -1,3 +1,4 @@
+import * as PIXI from "pixi.js";
 import { AnimationTicker } from "./animation/AnimationTicker";
 import { AvatarLoader } from "./avatar/AvatarLoader";
 import { FurnitureLoader } from "./furniture/FurnitureLoader";
@@ -17,6 +18,52 @@ export class Shroom {
     } & Partial<Dependencies>
   ) {
     return this.createShared(options).for(options.application);
+  }
+
+  /**
+   * Create a shroom instance asynchronously with all resources preloaded
+   */
+  static async createAsync(
+    options: {
+      resourcePath?: string;
+      application: PIXI.Application;
+      preload?: {
+        furniture?: string[];
+        avatars?: string[];
+      };
+    } & Partial<Dependencies>
+  ): Promise<Shroom> {
+    const shroom = this.create(options);
+    
+    // Preload furniture data if not provided
+    if (!options.furnitureData && options.resourcePath) {
+      await shroom.dependencies.furnitureData?.getInfos();
+    }
+
+    // Preload specific furniture if requested
+    if (options.preload?.furniture) {
+      await Promise.all(
+        options.preload.furniture.map(type =>
+          shroom.dependencies.furnitureLoader.loadFurni({ kind: "type", type })
+        )
+      );
+    }
+
+    // Preload avatar looks if requested
+    if (options.preload?.avatars) {
+      await Promise.all(
+        options.preload.avatars.map(look =>
+          shroom.dependencies.avatarLoader.getAvatarDrawDefinition({
+            look,
+            direction: 0,
+            headDirection: 0,
+            actions: new Set()
+          })
+        )
+      );
+    }
+
+    return shroom;
   }
 
   /**

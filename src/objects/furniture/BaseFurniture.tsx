@@ -563,9 +563,55 @@ export class BaseFurniture implements IFurnitureEventHandlers, IEventGroup {
 
     return baseAlpha;
   }
+
+  /**
+   * Load furniture assets asynchronously. This is useful when you want to ensure
+   * furniture is fully loaded before adding it to the room.
+   * @returns Promise that resolves when furniture is loaded
+   */
+  async loadAsync(): Promise<void> {
+    // Trigger loading if not already started
+    if (this._loadFurniResult == null) {
+      this._loadFurniture();
+    }
+
+    // Wait for the loading promise to resolve
+    await this._loadFurniResultPromise;
+  }
+
+  /**
+   * Static factory method to create furniture asynchronously with assets preloaded
+   * @param options Furniture creation options
+   * @returns Promise that resolves to a fully loaded furniture instance
+   */
+  static async createAsync(
+    options: {
+      type: string | { kind: "type"; type: string };
+      direction: number;
+      animation?: string;
+      onLoad?: () => void;
+      onError?: (error: Error) => void;
+    } & BaseFurnitureProps
+  ): Promise<BaseFurniture> {
+    const furniture = new BaseFurniture(options);
+    
+    try {
+      await furniture.loadAsync();
+      if (options.onLoad) {
+        options.onLoad();
+      }
+    } catch (error) {
+      if (options.onError) {
+        options.onError(error as Error);
+      }
+      throw error;
+    }
+    
+    return furniture;
+  }
 }
 
 export interface IFurnitureRoomVisualization {
   container: PIXI.Container;
-  addMask(maskId: string, element: PIXI.DisplayObject): MaskNode;
+  addMask(maskId: string, element: PIXI.Container): MaskNode;
 }

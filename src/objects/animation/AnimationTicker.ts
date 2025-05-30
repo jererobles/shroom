@@ -1,3 +1,4 @@
+import * as PIXI from "pixi.js";
 import { IAnimationTicker } from "../../interfaces/IAnimationTicker";
 
 const ANIM_FPS = 24;

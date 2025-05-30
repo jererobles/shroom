@@ -32,6 +32,23 @@ export class FurnitureData implements IFurnitureData {
     );
   }
 
+  /**
+   * Create a FurnitureData instance with data preloaded.
+   * This ensures the furniture data is fully fetched and parsed before returning.
+   * @param resourcePath Path to the resources directory
+   * @returns Promise that resolves to a fully loaded FurnitureData instance
+   */
+  static async createAsync(resourcePath = ""): Promise<FurnitureData> {
+    const furnitureData = new FurnitureData(async () =>
+      fetch(`${resourcePath}/furnidata.xml`).then((response) => response.text())
+    );
+    
+    // Force load the data by accessing it
+    await furnitureData._data;
+    
+    return furnitureData;
+  }
+
   async getRevisionForType(type: string): Promise<number | undefined> {
     const info = await this.getInfo(type);
 

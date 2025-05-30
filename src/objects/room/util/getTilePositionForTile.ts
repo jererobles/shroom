@@ -1,3 +1,4 @@
+import * as PIXI from "pixi.js";
 import { getTilePosition } from "./getTilePosition";
 
 export function getTilePositionForTile(roomX: number, roomY: number) {

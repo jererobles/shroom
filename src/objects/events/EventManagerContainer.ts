@@ -12,42 +12,39 @@ export class EventManagerContainer {
 
     _application.ticker.add(this._updateRectangle);
 
-    const interactionManager: PIXI.InteractionManager = this._application
-      .renderer.plugins.interaction;
+    // In PIXI.js v8, use direct event listeners on the stage
+    this._application.stage.eventMode = 'static';
+    this._application.stage.hitArea = this._application.screen;
 
-    interactionManager.addListener(
+    this._application.stage.addEventListener(
       "pointermove",
-      (event: PIXI.InteractionEvent) => {
-        const position = event.data.getLocalPosition(this._application.stage);
-
-        this._eventManager.move(event, position.x, position.y);
-      },
-      true
+      (event: PIXI.FederatedPointerEvent) => {
+        const position = event.getLocalPosition(this._application.stage);
+        this._eventManager.move(event as any, position.x, position.y);
+      }
     );
 
-    interactionManager.addListener(
+    this._application.stage.addEventListener(
       "pointerup",
-      (event: PIXI.InteractionEvent) => {
-        const position = event.data.getLocalPosition(this._application.stage);
-
-        this._eventManager.pointerUp(event, position.x, position.y);
-      },
-      true
+      (event: PIXI.FederatedPointerEvent) => {
+        const position = event.getLocalPosition(this._application.stage);
+        this._eventManager.pointerUp(event as any, position.x, position.y);
+      }
     );
 
-    interactionManager.addListener(
+    this._application.stage.addEventListener(
       "pointerdown",
-      (event: PIXI.InteractionEvent) => {
-        const position = event.data.getLocalPosition(this._application.stage);
-
-        this._eventManager.pointerDown(event, position.x, position.y);
-      },
-      true
+      (event: PIXI.FederatedPointerEvent) => {
+        const position = event.getLocalPosition(this._application.stage);
+        this._eventManager.pointerDown(event as any, position.x, position.y);
+      }
     );
   }
 
   destroy() {
     this._application.ticker.remove(this._updateRectangle);
+    // Remove event listeners
+    this._application.stage.removeAllListeners();
   }
 
   private _updateRectangle = () => {
@@ -57,7 +54,11 @@ export class EventManagerContainer {
     const width = renderer.width / renderer.resolution;
     const height = renderer.height / renderer.resolution;
 
-    this._box = new PIXI.TilingSprite(PIXI.Texture.WHITE, width, height);
+    this._box = new PIXI.TilingSprite({
+      texture: PIXI.Texture.WHITE,
+      width,
+      height,
+    });
     this._box.alpha = 0.3;
 
     //this._application.stage.addChild(this._box);

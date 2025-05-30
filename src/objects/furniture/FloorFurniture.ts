@@ -71,6 +71,35 @@ export class FloorFurniture
   }
 
   /**
+   * Load furniture assets asynchronously. This is useful when you want to ensure
+   * the furniture is fully loaded before adding it to the room.
+   * @returns Promise that resolves when furniture is loaded
+   */
+  async loadAsync(): Promise<void> {
+    return this._baseFurniture.loadAsync();
+  }
+
+  /**
+   * Static factory method to create furniture asynchronously with assets preloaded
+   * @param options Furniture creation options
+   * @returns Promise that resolves to a fully loaded furniture instance
+   */
+  static async createAsync(
+    options: {
+      roomX: number;
+      roomY: number;
+      roomZ: number;
+      direction: number;
+      animation?: string;
+      behaviors?: IFurnitureBehavior<FloorFurniture>[];
+    } & FurnitureFetchInfo
+  ): Promise<FloorFurniture> {
+    const furniture = new FloorFurniture(options);
+    await furniture.loadAsync();
+    return furniture;
+  }
+
+  /**
    * Moves and animates the furniture to a new position.
    *
    * @param roomX New x-Position

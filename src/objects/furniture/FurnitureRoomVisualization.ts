@@ -1,3 +1,4 @@
+import * as PIXI from "pixi.js";
 import { MaskNode } from "../../interfaces/IRoomVisualization";
 import { IFurnitureRoomVisualization } from "./BaseFurniture";
 
