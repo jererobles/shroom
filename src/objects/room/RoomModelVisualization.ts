@@ -384,9 +384,10 @@ export class RoomModelVisualization
   }
 
   private _setCache(cache: boolean) {
-    [this._tileLayer, this._wallLayer].forEach(
-      (container) => (container.cacheAsBitmap = cache)
-    );
+    // FIXME: https://github.com/pixijs/pixijs/issues/11378 and https://github.com/pixijs/pixijs/issues/10942
+    // [this._tileLayer, this._wallLayer].forEach(
+    //   (container) => (container.cacheAsBitmap = cache)
+    // );
   }
 
   private _getLargestWallHeight() {
