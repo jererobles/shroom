@@ -1,11 +1,11 @@
 {
-  "name": "@jankuss/shroom",
-  "version": "0.7.2",
+  "name": "@jererobles/shroom",
+  "version": "0.8.0",
   "main": "dist/index.js",
   "license": "LGPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jankuss/shroom.git"
+    "url": "https://github.com/jererobles/shroom.git"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
