@@ -71,7 +71,7 @@
   },
   "engines": {
     "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "bun": ">=1.0.0"
   },
   "peerDependencies": {
     "pixi.js": "^8.0.0"
