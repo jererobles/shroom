@@ -1,64 +1,82 @@
 # This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
 # For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
 
-name: Node.js Package
+name: Publish to NPM
 
 on:
   release:
-    types: [created]
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty for package.json version)'
+        required: false
+        type: string
 
 jobs:
-  build:
+  publish:
+    name: Publish to NPM
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for provenance statements
+      
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          node-version: 12
-      - run: npm ci
-      - run: npm test
-
-  publish-npm:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+          # Fetch full history for proper version handling
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 12
-          registry-url: https://registry.npmjs.org/
-      - run: npm ci
-      - run: npm publish --access public
+          node-version: 20.x
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests
+        run: npm test
+        
+      - name: Build package
+        run: npm run build
+        
+      - name: Verify build artifacts
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Build failed - dist directory not found"
+            exit 1
+          fi
+          echo "✅ Build artifacts verified"
+          
+      - name: Check package contents
+        run: |
+          echo "📦 Package contents:"
+          npm pack --dry-run
+          
+      - name: Update version (if specified)
+        if: github.event.inputs.version != ''
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "Updated version to ${{ github.event.inputs.version }}"
+          
+      - name: Publish to NPM
+        run: |
+          echo "🚀 Publishing to NPM..."
+          npm publish --access public --provenance
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-  notify-discord:
-    if: "!github.event.release.prerelease"
-    needs: publish-npm
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./ci/discord
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: npm install
-      - run: npm start
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Create GitHub release (if workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/create-release@v1
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          GIT_VERSION_TAG: ${{ github.event.release.tag_name }}
-
-  publish-gpr:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          node-version: 12
-          registry-url: https://npm.pkg.github.com/
-      - run: npm ci
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          tag_name: v${{ steps.get-version.outputs.version }}
+          release_name: Release v${{ steps.get-version.outputs.version }}
+          draft: false
+          prerelease: false

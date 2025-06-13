@@ -69,6 +69,10 @@
     "xml2js": "^0.4.23",
     "yargs": "^16.2.0"
   },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "peerDependencies": {
     "pixi.js": "^8.0.0"
   },

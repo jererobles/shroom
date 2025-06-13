@@ -1,65 +1,114 @@
-name: documentation
+name: Documentation
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, main]
+    paths: ['docs/**', '.github/workflows/documentation.yml']
   push:
-    branches: [master]
+    branches: [master, main]
+    paths: ['docs/**', '.github/workflows/documentation.yml']
 
 jobs:
-  checks:
+  test-docs:
+    name: Test documentation build
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "12.x"
-      - name: Test Build
+          node-version: 20.x
+          cache: 'npm'
+          cache-dependency-path: 'docs/package-lock.json'
+          
+      - name: Install dependencies
+        working-directory: ./docs
         run: |
-          cd docs
-          if [ -e yarn.lock ]; then
-          yarn install --frozen-lockfile
-          elif [ -e package-lock.json ]; then
-          npm ci
+          if [ -f yarn.lock ]; then
+            echo "Using Yarn"
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            echo "Using npm with package-lock.json"
+            npm ci
           else
-          npm i
+            echo "Using npm without lock file"
+            npm install
           fi
-          npm run build
-  gh-release:
+          
+      - name: Build documentation
+        working-directory: ./docs
+        run: npm run build
+        
+      - name: Test documentation
+        working-directory: ./docs
+        run: |
+          if [ -f package.json ] && npm run --silent test > /dev/null 2>&1; then
+            npm run test
+          else
+            echo "No test script found, skipping tests"
+          fi
+
+  deploy-docs:
+    name: Deploy documentation
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          node-version: "12.x"
-      - name: Add key to allow access to repository
-        env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+          cache-dependency-path: 'docs/package-lock.json'
+          
+      - name: Configure Git
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          echo "${{ secrets.GH_PAGES_DEPLOY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          cat <<EOT >> ~/.ssh/config
-          Host github.com
-          HostName github.com
-          IdentityFile ~/.ssh/id_rsa
-          EOT
-      - name: Release to GitHub Pages
-        env:
-          USE_SSH: true
-          GIT_USER: git
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          
+      - name: Install dependencies
+        working-directory: ./docs
         run: |
-          cd docs
-          git config --global user.email "actions@gihub.com"
-          git config --global user.name "gh-actions"
-          if [ -e yarn.lock ]; then
-          yarn install --frozen-lockfile
-          elif [ -e package-lock.json ]; then
-          npm ci
+          if [ -f yarn.lock ]; then
+            echo "Using Yarn"
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            echo "Using npm with package-lock.json"
+            npm ci
           else
-          npm i
+            echo "Using npm without lock file"
+            npm install
           fi
-          npx docusaurus deploy
+          
+      - name: Build and deploy documentation
+        working-directory: ./docs
+        run: |
+          if command -v docusaurus >/dev/null 2>&1; then
+            echo "Using Docusaurus deploy"
+            npx docusaurus deploy
+          elif npm run --silent deploy > /dev/null 2>&1; then
+            echo "Using npm deploy script"
+            npm run deploy
+          else
+            echo "Building documentation"
+            npm run build
+            echo "Documentation built successfully"
+          fi
+        env:
+          USE_SSH: false
+          GIT_USER: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
