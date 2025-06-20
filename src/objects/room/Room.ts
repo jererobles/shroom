@@ -358,12 +358,12 @@ export class Room
    * @returns Promise that resolves when the object is fully loaded and added
    */
   async addRoomObjectAsync(object: IRoomObject): Promise<void> {
-    // If the object has a loadAsync method, wait for it
-    if ('loadAsync' in object && typeof object.loadAsync === 'function') {
-      await object.loadAsync();
-    }
-    
     this._roomObjectContainer.addRoomObject(object);
+
+    // If the object has a waitForAssetsToLoadAsync method, wait for it
+    if ('waitForAssetsToLoadAsync' in object && typeof object.waitForAssetsToLoadAsync === 'function') {
+      await object.waitForAssetsToLoadAsync();
+    }    
   }
 
   /**
