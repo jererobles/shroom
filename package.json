@@ -47,7 +47,7 @@
     "bin-pack": "^1.0.2",
     "bluebird": "^3.7.2",
     "bytebuffer": "^5.0.1",
-    "canvas": "^2.6.1",
+    "canvas": "^3.1.2",
     "chalk": "^4.1.0",
     "detect-edges": "^1.0.1",
     "events": "^3.2.0",
@@ -78,7 +78,7 @@
   },
   "scripts": {
     "dev": "tsc --watch",
-    "dump": "yarn ts-node-dev src/downloading/cli/index.tsx dump",
+    "dump": "bun run ./src/cli/index.tsx dump",
     "test": "jest",
     "build": "rm -rf dist && tsc",
     "prepublishOnly": "bun run build",
