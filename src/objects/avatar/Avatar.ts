@@ -630,7 +630,10 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
       zOffset += 2000;
     }
 
-    return getZOrder(roomX, roomY, roomZ) + zOffset;
+    const baseZOrder = getZOrder(roomX, roomY, roomZ);
+    const finalZIndex = baseZOrder + zOffset;
+
+    return finalZIndex;
   }
 
   private _updatePosition() {
@@ -668,6 +671,15 @@ export class Avatar extends RoomObject implements IMoveable, IScreenPositioned {
         this._avatarSprites
       );
       this.roomVisualization.container.addChild(this._avatarSprites);
+      
+      // Mark container as needing sort
+      const container = this.roomVisualization.container as any;
+      if (container.sortDirty !== undefined) {
+        container.sortDirty = true;
+      }
+      
+      // Force re-sort after adding child
+      this.roomVisualization.container.sortChildren();
     }
   }
 
