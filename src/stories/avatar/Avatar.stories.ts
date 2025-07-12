@@ -1,6 +1,6 @@
-import { Avatar, AvatarAction, Room, BaseAvatar } from "@jankuss/shroom";
+import { Avatar, AvatarAction, Room, BaseAvatar } from "../../../dist";
 import { createShroom } from "../common/createShroom";
-import { action } from "@storybook/addon-actions";
+import { action } from "storybook/actions";
 
 export default {
   title: "Avatar / General",

@@ -13,9 +13,9 @@ import {
   IFurniture,
   Room,
   WallFurniture,
-} from "@jankuss/shroom";
+} from "../../../dist";
 import { createShroom } from "../common/createShroom";
-import { action } from "@storybook/addon-actions";
+import { action } from "storybook/actions";
 import fetch from "node-fetch";
 import {
   AVATAR,

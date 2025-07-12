@@ -6,7 +6,7 @@ import {
   RoomCamera,
   Avatar,
   FloorFurniture,
-} from "@jankuss/shroom";
+} from "../../dist";
 
 import { createShroom } from "./common/createShroom";
 import tile from "./assets/tile2.png";

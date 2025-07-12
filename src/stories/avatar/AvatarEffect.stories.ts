@@ -1,4 +1,4 @@
-import { Room, Avatar } from "@jankuss/shroom";
+import { Room, Avatar } from "../../../dist";
 import { renderAvatarDirections } from "./renderAvatarDirections";
 
 export default {

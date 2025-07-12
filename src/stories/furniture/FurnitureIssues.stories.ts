@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Room, FloorFurniture } from "@jankuss/shroom";
+import { Room, FloorFurniture } from "../../../dist";
 
 import { createShroom } from "../common/createShroom";
 

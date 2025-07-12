@@ -1,4 +1,4 @@
-import { Room } from "@jankuss/shroom";
+import { Room } from "../../dist";
 import { createShroom } from "./common/createShroom";
 
 export default {

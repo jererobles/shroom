@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
-import { Avatar, Room, FloorFurniture, RoomCamera } from "@jankuss/shroom";
-import { action } from "@storybook/addon-actions";
+import { Avatar, Room, FloorFurniture, RoomCamera } from "../../dist";
+import { action } from "storybook/actions";
 import { createShroom } from "./common/createShroom";
 
 export default {

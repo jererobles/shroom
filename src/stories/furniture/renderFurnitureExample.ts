@@ -1,4 +1,4 @@
-import { Room, FloorFurniture } from "@jankuss/shroom";
+import { Room, FloorFurniture } from "../../../dist";
 import { createShroom } from "../common/createShroom";
 
 export function renderFurnitureExample(

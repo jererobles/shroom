@@ -1,4 +1,4 @@
-import { Room, Avatar } from "@jankuss/shroom";
+import { Room, Avatar } from "../../../dist";
 import { createShroom } from "../common/createShroom";
 
 const directions = [0, 1, 2, 3, 4, 5, 6, 7];
