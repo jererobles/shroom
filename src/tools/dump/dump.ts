@@ -2,20 +2,12 @@ import { getExternalVariableUrls } from "./getExternalVariableUrls";
 import { getOriginsExternalVariableUrls } from "./getOriginsExternalVariableUrls";
 import { downloadAllFiles } from "./downloadAllFiles";
 import { downloadOriginsFiles } from "./downloadOriginsFiles";
-import { OriginsAssetInfo } from "./findOriginsDCRs";
 import { Logger } from "./Logger";
 import { promisify } from "util";
 import g from "glob";
 import { extractSwfs } from "./extractSwfs";
-import { extractDCRs } from "./extractDCRs";
-import { extractCCTs } from "./extractCCTs";
-import { promises as fs } from "fs";
-import { FigureMapData } from "../../objects/avatar/data/FigureMapData";
-import { createOffsetFile } from "./createOffsetFile";
 import { dumpFigure } from "./dumpFigure";
 import { dumpFurniture } from "./dumpFurniture";
-import { dumpOriginsFigure } from "./dumpOriginsFigure";
-import { dumpOriginsFurniture } from "./dumpOriginsFurniture";
 
 export const glob = promisify(g);
 
@@ -42,9 +34,6 @@ export async function dump({ externalVariables, downloadPath, isOrigins }: Optio
       // Handle Origins (Shockwave) assets
       const variables = await getOriginsExternalVariableUrls(externalVariables);
 
-      let assetFiles: OriginsAssetInfo[] = [];
-      let clientDir: string = "";
-
       await step("Download from Origins Server", async () => {
         console.log("Found following URLs in the Origins external variables:");
         console.log("- Figure Data:", variables.externalFigurepartlistUrl);
@@ -54,48 +43,9 @@ export async function dump({ externalVariables, downloadPath, isOrigins }: Optio
         console.log("- Room Casts:", variables.roomCasts.size);
         console.log("");
 
-        const result = await downloadOriginsFiles(downloadPath, variables, logger);
-        assetFiles = result.assetFiles;
-        clientDir = result.clientDir;
+        const clientDir = await downloadOriginsFiles(downloadPath, variables, logger);
         
-        console.log(`Successfully downloaded Origins files into ${downloadPath}`);
-        const dcrCount = assetFiles.filter(f => f.fileType === 'dcr').length;
-        const cctCount = assetFiles.filter(f => f.fileType === 'cct').length;
-        console.log(`Found ${assetFiles.length} Origins asset files in client (${dcrCount} DCR, ${cctCount} CCT)`);
-      });
-
-      await step("Extract Origins Assets", async () => {
-        // Filter and separate different types of assets
-        const furnitureAssets = [];//assetFiles.filter(asset => asset.type === 'furniture');
-        const figureAssets = assetFiles.filter(asset => asset.type === 'figure');
-        
-        const furnitureDCRs = furnitureAssets.filter(asset => asset.fileType === 'dcr').map(asset => asset.path);
-        const furnitureCCTs = furnitureAssets.filter(asset => asset.fileType === 'cct').map(asset => asset.path);
-        const figureDCRs = figureAssets.filter(asset => asset.fileType === 'dcr').map(asset => asset.path);
-        const figureCCTs = figureAssets.filter(asset => asset.fileType === 'cct').map(asset => asset.path);
-        
-        console.log(
-          `Found ${furnitureAssets.length} furniture assets (${furnitureDCRs.length} DCR, ${furnitureCCTs.length} CCT) and ${figureAssets.length} figure assets (${figureDCRs.length} DCR, ${figureCCTs.length} CCT). Starting the extraction process.`
-        );
-
-        // Extract DCR files (these contain logic/metadata)
-        if (furnitureDCRs.length > 0) {
-          await extractDCRs(logger, "Origins Furniture (DCR)", furnitureDCRs, dumpOriginsFurniture);
-        }
-        
-        if (figureDCRs.length > 0) {
-          await extractDCRs(logger, "Origins Figures (DCR)", figureDCRs, dumpOriginsFigure);
-        }
-
-        // Extract CCT files (these contain actual graphics/assets)
-        // CCT files need a different extraction approach than DCR files
-        if (furnitureCCTs.length > 0) {
-          await extractCCTs(logger, "Origins Furniture (CCT)", furnitureCCTs, dumpOriginsFurniture);
-        }
-        
-        if (figureCCTs.length > 0) {
-          await extractCCTs(logger, "Origins Figures (CCT)", figureCCTs, dumpOriginsFigure);
-        }
+        console.log(`Successfully downloaded Origins files into ${clientDir}`);
       });
     } else {
       // Handle modern SWF assets
