@@ -12,3 +12,8 @@ node_modules
 /e2e/public/resources
 yarn.lock
 /.idea
+.DS_Store
+*storybook.log
+storybook-static
+DirectorCastRipper
+ProjectorRays

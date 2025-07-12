@@ -148,7 +148,7 @@ export class Landscape extends RoomObject implements IRoomPart {
           0
         );
 
-        (wall as any).transform.setFromMatrix(new PIXI.Matrix(1, -0.5, 0, 1));
+        wall.setFromMatrix(new PIXI.Matrix(1, -0.5, 0, 1));
 
         wall.x = position.x;
         wall.y = position.y + 16;
@@ -179,7 +179,7 @@ export class Landscape extends RoomObject implements IRoomPart {
           0
         );
 
-        (wall as any).transform.setFromMatrix(new PIXI.Matrix(1, 0.5, 0, 1));
+        wall.setFromMatrix(new PIXI.Matrix(1, 0.5, 0, 1));
 
         wall.x = position.x + 32;
         wall.y = position.y;

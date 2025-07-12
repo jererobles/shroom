@@ -25,15 +25,21 @@ yargs(hideBin(process.argv))
           type: "string",
           describe: "Path to store the extracted resources",
         })
+        .option("origins", {
+          type: "boolean",
+          default: false,
+          describe: "Use Origins (Shockwave) asset format instead of modern SWF format",
+        })
         .demandOption(
           ["location"],
           "Provide a location to store the extracted resources"
         );
     },
-    (options: { url?: string; location: string }) => {
+    (options: { url?: string; location: string; origins?: boolean }) => {
       dump({
         externalVariables: options.url,
         downloadPath: options.location,
+        isOrigins: options.origins,
       }).catch(console.error);
     }
   )
